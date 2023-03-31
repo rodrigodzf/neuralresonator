@@ -1,0 +1,11 @@
+_target_: neuralresonator.data.MultiShapeMultiMaterialDataModule
+batch_size: 4
+num_workers: 2
+audio_length_in_seconds: 0.2
+sample_rate: 32000
+material_ranges:
+  rho: [500, 15000]
+  E: [8.e+9, 5.e+10]
+  nu: [0.1, 0.4]
+  alpha: [1, 10]
+  beta: [3.e-7, 2.e-6]

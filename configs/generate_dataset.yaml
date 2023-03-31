@@ -1,0 +1,40 @@
+# @package _global_
+
+paths:
+  output_dir: ${hydra:runtime.output_dir}
+  work_dir: ${hydra:runtime.cwd}
+  root_dir: ${paths.work_dir}
+  data_dir: ${paths.root_dir}/data/
+  log_dir: ${paths.root_dir}/logs/
+  train_data_dir: ${paths.data_dir}/materials_shapes_train/
+  val_data_dir: ${paths.data_dir}/materials_shapes_val/
+  test_data_dir: ${paths.data_dir}/materials_shapes_test/
+
+defaults:
+  - _self_
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled  
+  
+hydra:  
+  output_subdir: null  
+  run:  
+    dir: .
+
+seed: 42
+
+n_vertices: 13
+n_modes: 32
+n_refinements: 3
+
+n_train_shapes: 1
+n_train_materials: 1
+
+n_val_shapes: 1
+n_val_materials: 1
+
+n_test_shapes: 1
+n_test_materials: 1
+
+train_materials: null
+val_materials: null
+test_materials: null

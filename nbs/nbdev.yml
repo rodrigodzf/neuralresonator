@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "neuralresonator"
+  site-url: "https://rodrigodzf.github.io/neuralresonator"
+  description: "synthesis with IIR filter networks learnt by gradient descent"
+  repo-branch: main
+  repo-url: "https://github.com/rodrigodzf/neuralresonator"

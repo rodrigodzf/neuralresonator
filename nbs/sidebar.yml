@@ -1,0 +1,13 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_dsp.ipynb
+      - 01_modal.ipynb
+      - 02_shape.ipynb
+      - 03_data.ipynb
+      - 04_models.ipynb
+      - 05_training.ipynb
+      - 06_utilities.ipynb
+      - 07_scripts.ipynb
+      - results.ipynb

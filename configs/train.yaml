@@ -1,0 +1,55 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - model: default.yaml
+  - datamodule: default.yaml
+  - hparams_search: null
+
+paths:
+  output_dir: ${hydra:runtime.output_dir}
+  work_dir: ${hydra:runtime.cwd}
+  root_dir: ${paths.work_dir}
+  data_dir: ${paths.root_dir}/data/polycarbonate
+  log_dir: ${paths.root_dir}/logs/
+
+logger:
+  _target_: lightning.pytorch.loggers.wandb.WandbLogger
+  save_dir: "${paths.output_dir}"
+  offline: False
+  project: "neuralresonator"
+  log_model: True # upload lightning ckpts
+  group: ""
+
+trainer:
+  _target_: lightning.pytorch.Trainer
+  accelerator: gpu
+  devices: 1
+  max_steps: 500000
+  logger: ${logger}
+  default_root_dir: ${paths.output_dir}
+  gradient_clip_val: 1 # clip gradients
+  val_check_interval: 2000 # check val loss every 2000 batches
+  check_val_every_n_epoch: null
+  callbacks:
+    - _target_: lightning.pytorch.callbacks.LearningRateMonitor
+      logging_interval: "step"
+    - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+      dirpath: ${paths.output_dir}/checkpoints
+      monitor: "val/loss"
+      mode: min
+      every_n_train_steps: 10000
+      save_last: True
+      verbose: True
+      filename: "{epoch:02d}-{step:06d}-{val/loss:.2f}"
+    - _target_: lightning.pytorch.callbacks.EarlyStopping
+      monitor: "val/loss"
+      patience: 100 # stop training if val loss does not improve for 100 val_check_interval
+      verbose: True
+      mode: min
+
+# checkpoint path to resume training
+ckpt_path: null
+
+# seed for random number generators in pytorch, numpy and python.random
+seed: null

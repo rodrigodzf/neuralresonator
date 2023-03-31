@@ -1,0 +1,36 @@
+_target_: neuralresonator.training.MultiShapeMultiMaterialLitModule
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.00004
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.OneCycleLR
+  _partial_: true
+  cycle_momentum: False
+  max_lr: 0.0003
+  total_steps: 500000
+
+criterion:
+  _target_: neuralresonator.utilities.MelScaleLoss
+  lin_l1: 0.0 # weight of the linear l1 loss
+  lin_l2: 1.0 # weight of the linear l2 loss
+  log_l1: 0.0 # weight of the log l1 loss
+  log_l2: 0.2 # weight of the log l2 loss
+  n_mels: 256
+  f_min: 0
+  f_max: 16000 # max fs / 2
+  sample_rate: 32000
+  n_fft: 3201 # 4801 = 0.3 @ 32000
+
+model:
+  _target_: neuralresonator.models.CoefficientsFC
+  input_size: 1007
+  n_parallel: 32
+  n_biquads: 2
+  initial_gain_scale: 1.0
+  tahn_c: 1.0
+  tanh_d: 1.0
+  hidden_sizes: [1024, 1024, 1024, 1024, 1024, 1024]
