@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Provides torch dataset wrappers and utilities for modal synthesis">
+
+<title>neuralresonator - Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="neuralresonator - Data">
+<meta property="og:description" content="Provides torch dataset wrappers and utilities for modal synthesis">
+<meta property="og:image" content="https://rodrigodzf.github.io/neuralresonator/03_data_files/figure-html/cell-7-output-2.png">
+<meta property="og:site-name" content="neuralresonator">
+<meta property="og:image:height" content="449">
+<meta property="og:image:width" content="837">
+<meta name="twitter:title" content="neuralresonator - Data">
+<meta name="twitter:description" content="Provides torch dataset wrappers and utilities for modal synthesis">
+<meta name="twitter:image" content="https://rodrigodzf.github.io/neuralresonator/03_data_files/figure-html/cell-7-output-2.png">
+<meta name="twitter:image-height" content="449">
+<meta name="twitter:image-width" content="837">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">neuralresonator</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./data.html">Data</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dsp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DSP</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./modal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modal synthesis</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Shape</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Models</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./utilities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Utilities</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./scripts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scripts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./results.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Results</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#datasets" id="toc-datasets" class="nav-link active" data-scroll-target="#datasets">Datasets</a>
+  <ul class="collapse">
+  <li><a href="#singleshapedataset" id="toc-singleshapedataset" class="nav-link" data-scroll-target="#singleshapedataset">SingleShapeDataset</a></li>
+  </ul></li>
+  <li><a href="#dataset-generator" id="toc-dataset-generator" class="nav-link" data-scroll-target="#dataset-generator">Dataset generator</a>
+  <ul class="collapse">
+  <li><a href="#generate_dataset" id="toc-generate_dataset" class="nav-link" data-scroll-target="#generate_dataset">generate_dataset</a></li>
+  <li><a href="#generate_random_dataset" id="toc-generate_random_dataset" class="nav-link" data-scroll-target="#generate_random_dataset">generate_random_dataset</a></li>
+  <li><a href="#multishapemultimaterialdataset" id="toc-multishapemultimaterialdataset" class="nav-link" data-scroll-target="#multishapemultimaterialdataset">MultiShapeMultiMaterialDataset</a></li>
+  </ul></li>
+  <li><a href="#data-module" id="toc-data-module" class="nav-link" data-scroll-target="#data-module">Data module</a>
+  <ul class="collapse">
+  <li><a href="#multishapemultimaterialdatamodule" id="toc-multishapemultimaterialdatamodule" class="nav-link" data-scroll-target="#multishapemultimaterialdatamodule">MultiShapeMultiMaterialDataModule</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/rodrigodzf/neuralresonator/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Data</h1>
+</div>
+
+<div>
+  <div class="description">
+    Provides <code>torch</code> dataset wrappers and utilities for modal synthesis
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="datasets" class="level2">
+<h2 class="anchored" data-anchor-id="datasets">Datasets</h2>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/data.py#L34" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="singleshapedataset" class="level3">
+<h3 class="anchored" data-anchor-id="singleshapedataset">SingleShapeDataset</h3>
+<blockquote class="blockquote">
+<pre><code> SingleShapeDataset
+                     (material:neuralresonator.modal.Material=Material(rho
+                     =2700, E=72000000000.0, nu=0.19, alpha=6,
+                     beta=1e-07), n_modes:int=32,
+                     audio_length_in_seconds:float=0.3,
+                     sample_rate:float=32000, n_refinements:int=3,
+                     mesh:Optional[skfem.mesh.mesh_2d.Mesh2D]=None)</code></pre>
+</blockquote>
+<p>A synthetic dataset of materials and audio generated from their modal vibrations.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>material</td>
+<td>Material</td>
+<td>Material(rho=2700, E=72000000000.0, nu=0.19, alpha=6, beta=1e-07)</td>
+<td>Material to use</td>
+</tr>
+<tr class="even">
+<td>n_modes</td>
+<td>int</td>
+<td>32</td>
+<td>Number of modes to use</td>
+</tr>
+<tr class="odd">
+<td>audio_length_in_seconds</td>
+<td>float</td>
+<td>0.3</td>
+<td>Length of audio to render</td>
+</tr>
+<tr class="even">
+<td>sample_rate</td>
+<td>float</td>
+<td>32000</td>
+<td>Sample rate of audio to render</td>
+</tr>
+<tr class="odd">
+<td>n_refinements</td>
+<td>int</td>
+<td>3</td>
+<td>Number of refinement steps for the mesh</td>
+</tr>
+<tr class="even">
+<td>mesh</td>
+<td>typing.Optional[skfem.mesh.mesh_2d.Mesh2D]</td>
+<td>None</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="dataset-generator" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-generator">Dataset generator</h2>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/data.py#L116" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="generate_dataset" class="level3">
+<h3 class="anchored" data-anchor-id="generate_dataset">generate_dataset</h3>
+<blockquote class="blockquote">
+<pre><code> generate_dataset (materials:List[neuralresonator.modal.Material],
+                   shapes:List[numpy.ndarray], n_modes:int=32,
+                   n_refinements:int=3, scale_factor:float=1,
+                   resolution:tuple[int,int]=(64, 64),
+                   without_boundary_nodes:bool=True,
+                   data_dir:pathlib.Path=Path('data'))</code></pre>
+</blockquote>
+<p>Generates a dataset of shapes and materials.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>materials</td>
+<td>typing.List[neuralresonator.modal.Material]</td>
+<td></td>
+<td>List of materials</td>
+</tr>
+<tr class="even">
+<td>shapes</td>
+<td>typing.List[numpy.ndarray]</td>
+<td></td>
+<td>List of shapes</td>
+</tr>
+<tr class="odd">
+<td>n_modes</td>
+<td>int</td>
+<td>32</td>
+<td>Number of modes</td>
+</tr>
+<tr class="even">
+<td>n_refinements</td>
+<td>int</td>
+<td>3</td>
+<td>Number of refinements</td>
+</tr>
+<tr class="odd">
+<td>scale_factor</td>
+<td>float</td>
+<td>1</td>
+<td>Scale factor for the mesh</td>
+</tr>
+<tr class="even">
+<td>resolution</td>
+<td>tuple</td>
+<td>(64, 64)</td>
+<td>Resolution of the occupancy map</td>
+</tr>
+<tr class="odd">
+<td>without_boundary_nodes</td>
+<td>bool</td>
+<td>True</td>
+<td>Whether to remove the boundary nodes</td>
+</tr>
+<tr class="even">
+<td>data_dir</td>
+<td>Path</td>
+<td>data</td>
+<td>Directory to save the data</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/data.py#L84" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="generate_random_dataset" class="level3">
+<h3 class="anchored" data-anchor-id="generate_random_dataset">generate_random_dataset</h3>
+<blockquote class="blockquote">
+<pre><code> generate_random_dataset (n_shapes:int, n_materials:int, n_vertices:int,
+                          **kwargs)</code></pre>
+</blockquote>
+<p>Generates a dataset of shapes and materials.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>n_shapes</td>
+<td>int</td>
+<td>Number of shapes to generate</td>
+</tr>
+<tr class="even">
+<td>n_materials</td>
+<td>int</td>
+<td>Number of materials to generate</td>
+</tr>
+<tr class="odd">
+<td>n_vertices</td>
+<td>int</td>
+<td>Number of vertices for the shape</td>
+</tr>
+<tr class="even">
+<td>kwargs</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Generate a random dataset</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n_shapes <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>n_materials <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>n_vertices <span class="op">=</span> <span class="dv">13</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>scale_factor <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>n_refinements <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>data_dir <span class="op">=</span> Path(<span class="st">"data"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_dir.exists():</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    data_dir.mkdir()</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>generate_random_dataset(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    n_shapes<span class="op">=</span>n_shapes,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    n_materials<span class="op">=</span>n_materials,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    materials<span class="op">=</span>[MATERIALS[<span class="st">'polycarbonate'</span>]],</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    n_vertices<span class="op">=</span>n_vertices,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    n_modes<span class="op">=</span><span class="dv">64</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    scale_factor<span class="op">=</span>scale_factor,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    n_refinements<span class="op">=</span>n_refinements,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Finish generating shapes and materials</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Saved 00009_00000.npy: 100%|██████████| 10/10 [00:06&lt;00:00,  1.55it/s]</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/data.py#L208" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="multishapemultimaterialdataset" class="level3">
+<h3 class="anchored" data-anchor-id="multishapemultimaterialdataset">MultiShapeMultiMaterialDataset</h3>
+<blockquote class="blockquote">
+<pre><code> MultiShapeMultiMaterialDataset (index_map_path:pathlib.Path,
+                                 audio_length_in_seconds:float=0.3,
+                                 sample_rate:int=16000)</code></pre>
+</blockquote>
+<p>A synthetic dataset of materials, shapes and audio generated from their modal vibrations.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>index_map_path</td>
+<td>Path</td>
+<td></td>
+<td>Directory to read data from</td>
+</tr>
+<tr class="even">
+<td>audio_length_in_seconds</td>
+<td>float</td>
+<td>0.3</td>
+<td>Length of audio to render</td>
+</tr>
+<tr class="odd">
+<td>sample_rate</td>
+<td>int</td>
+<td>16000</td>
+<td>Sample rate of audio to render</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>None</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Load a dataset</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sr <span class="op">=</span> <span class="dv">16000</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> MultiShapeMultiMaterialDataset(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"data/index_map.csv"</span>),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    sample_rate<span class="op">=</span>sr,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> dataset[np.random.choice(<span class="bu">len</span>(dataset))]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> data[<span class="st">"mask"</span>]</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>scaled_coords <span class="op">=</span> data[<span class="st">"coords"</span>] <span class="op">*</span> mask.shape[<span class="dv">1</span>]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>material <span class="op">=</span> data[<span class="st">"material_params"</span>]</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>audio <span class="op">=</span> data[<span class="st">"audio"</span>]</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(audio.shape)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Material: </span><span class="sc">{</span>material<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].imshow(mask[<span class="dv">0</span>])</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(scaled_coords[<span class="dv">0</span>], scaled_coords[<span class="dv">1</span>], c<span class="op">=</span><span class="st">"r"</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(audio)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_title(<span class="st">"Audio"</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>save_and_display_audio(audio, <span class="ss">f"dataload.wav"</span>, sr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(4800,)
+Material: [ 0.07263158  0.0014014   0.74       -0.01724138  0.1959799 ]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="03_data_files/figure-html/cell-7-output-2.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+
+                <audio controls="controls">
+                    <source src="data:audio/x-wav;base64,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1f/3/x0APQBKAEAAIgD4/9D/tv+z/8f/7f8ZAD0ATgBGACgA/v/X/73/uf/J/+j/CwApADsAPAAtABQA9f/Y/8X/wf/P/+v/DwAxAEQAQwArAAUA3f/A/7j/x//n/w0ALQA+ADoAJgAIAOn/0//L/9H/5P/8/xUAJwAvACoAGwACAOj/0//L/9P/6/8LACYANAAwAB0AAQDm/9X/0v/d//D/BwAbACcAJwAbAAgA8v/g/9j/3P/r/wAAFQAjACYAHQAMAPb/5P/a/9v/5//7/xAAIQAoACIAEQD6/+T/2P/Y/+X/+v8QACAAJgAhABMA///r/93/2f/g//D/BQAZACYAKAAeAAsA8//e/9P/1v/m//7/FwAoACwAIgANAPb/4//a/9v/5v/2/wgAGAAiACQAHAAMAPb/4v/V/9X/5P/8/xYAKAAsACIADQD2/+P/2v/d/+n/+/8LABgAHQAbABIABQD2/+r/4//k/+z/+/8LABgAHgAbAA8A/v/u/+P/4v/q//n/CgAWABsAFgALAP3/8f/r/+v/8v/9/wYADQAOAAwABgAAAPv/9//1//b/+P/8/wIACQAOAA4ACQD///T/7P/s//X/AgAPABYAEwAIAPr/7//r//D/+v8FAAwADQAKAAQAAAD8//v/+f/4//f/+P/8/wMACwAQABAACgD+//H/6f/p//H///8NABYAFwAQAAQA9//u/+v/7//3/wEACQANAA0ACwAGAAAA+//2//T/8//1//v/AgAKABAAEAAMAAMA+P/v/+v/7//5/wUADwATABAABgD7//T/8v/2//z/AgAEAAQAAgAAAAAAAgAEAAMA///7//f/9//7/wEABwAJAAcAAQD7//f/+P/9/wMACAAIAAMA/f/3//b/+f///wUACQAJAAYAAAD7//f/9//5//z/AAADAAUABgAGAAUAAwD+//r/9v/0//X/+/8CAAoADwAPAAsAAQD3/+//7P/v//j/AwAOABMAEgALAAEA+P/x/+//8v/3//7/BQALAA4ADgALAAQA+//y/+z/7f/z//7/CgATABUAEAAFAPn/8P/s/+7/9v8AAAgADgAPAAwABgD///j/8//x//P/+f8BAAkADgAPAAoAAgD5//L/8P/z//r/AwAKAA4ADQAIAAAA+P/z//L/9f/7/wMACQANAAwACAABAPn/8//w//P/+f8CAAsAEAAQAAsAAgD4/+//7P/v//f/AgANABQAFAAOAAMA9//u/+r/7P/0////CgATABYAFAALAP//8v/o/+X/6f/1/wQAEwAdAB0AFAAEAPP/5f/g/+T/8f8CABEAGwAdABYACgD7/+7/5f/j/+n/9f8FABMAHQAfABcACAD1/+b/3f/f/+z//v8SAB8AIgAbAAsA+P/p/+D/4v/r//r/CgAWABsAGQAQAAIA9P/p/+T/5//w//7/DgAZAB0AGAALAPr/6v/h/+H/7P/9/w8AGwAeABcACAD4/+v/5f/n//H//v8KABMAFgATAAsAAAD0/+v/5//q//T/AgARABsAHAAUAAUA8//l/9//5P/y/wUAFgAgAB8AFAADAPH/5f/g/+X/8v8CABAAGgAdABgADAD8/+z/4v/f/+b/9P8HABkAJAAkABgABADu/93/1v/c/+7/BQAaACcAJwAcAAgA8v/h/9r/3f/q//z/DwAdACQAIQAVAAMA7//f/9f/3P/r/wIAGQAoACsAIAALAPL/3v/U/9j/6P/+/xQAIwAnACAAEAD8/+n/3f/b/+P/8/8GABgAIgAjABkACAD0/+P/2v/d/+r//v8TACIAJgAeAA0A9//l/9v/3f/p//z/DwAdACIAHAAOAPz/7P/h/+D/6P/2/wcAFgAfAB4AFQAFAPL/4//d/+H/7/8CABYAIgAkABkABwDy/+L/2//g/+7/AQATAB8AIgAbAAwA+f/o/93/3P/m//f/DAAdACYAIwAWAAEA6//c/9f/3v/w/wYAGwAnACgAHAAIAPL/4P/W/9n/5//8/xIAIwAqACQAEwD9/+b/2P/U/97/8v8JAB4AKgApABwABwDw/93/1P/Y/+j///8VACYAKwAjABAA+f/k/9j/1//i//X/CwAeACgAJgAZAAUA7v/d/9b/3P/s/wIAGAAlACgAHQAKAPX/4//a/9z/6f/8/w8AHgAjAB4AEQD+/+z/3//c/+P/8/8HABkAIwAjABcABADv/+D/2//h//H/BQAXACEAIQAXAAYA8//l/9//4v/t//7/EAAdACEAHAAOAPv/6f/e/9z/5v/3/wwAHQAlACIAFAAAAOv/3f/Z/+H/8v8IABsAJQAkABgABQDw/+H/2v/e/+z///8SACAAJQAgABAA/P/o/9r/1//g//P/CgAeACkAKAAaAAQA7P/b/9X/3P/u/wQAGQAlACYAHQALAPb/5f/b/9v/5f/3/wsAHAAmACQAGAADAO7/3f/X/93/7v8EABkAJQAmABsACADz/+L/2//e/+v//v8QAB4AIgAcAA4A/f/s/+H/3//m//X/BgAWAB8AHwAVAAUA8v/k/97/4v/w/wIAFAAfACAAFwAHAPT/5v/g/+T/8P8AAA8AGgAcABcACgD7/+3/5P/j/+v/+P8IABYAHgAcABIAAQDv/+L/3//l//T/BwAXACAAHwAUAAMA8v/l/+D/5P/w/wEAEQAcAB8AGQALAPr/6v/g/+D/6P/4/woAGQAhAB8AEwABAO//4f/c/+L/8f8EABYAIQAiABgACAD1/+b/3v/g/+v//P8NABsAIAAdABAA///u/+L/3//l//P/BQAVAB8AIAAXAAcA9f/m/9//4v/u//7/DwAbAB4AGAAMAPz/7v/k/+P/6v/3/wcAFAAbABoAEQADAPT/6P/k/+j/8/8CAA8AGAAZABMABgD4/+3/5//p//H//v8LABQAFwATAAkA/P/x/+n/6f/v//r/BwASABcAFQAMAP//8//q/+j/7f/4/wUAEAAWABUADgACAPb/7P/o/+v/9P8BAA0AFQAXABIABwD6/+7/6P/o/+///P8KABUAGQAWAAwA/v/x/+j/5v/s//j/BgARABgAFwAQAAQA9//s/+f/6f/x//7/CwAVABkAFQALAP3/8P/n/+b/7P/4/wYAEgAZABcADwACAPX/6//n/+v/9P8AAAwAFAAWABEACAD9//L/6//q/+//+f8FAA8AFQAUAA0AAgD2/+3/6v/t//b/AgAMABIAEwANAAQA+f/y/+7/8P/2////BwANAA8ADQAHAP//9//x//D/8//7/wMACwAPAA8ACQAAAPf/8f/w//P/+/8EAAsADgANAAgAAAD4//P/8v/0//r/AgAIAAwADQAJAAMA+//1//H/8v/3//7/BgANAA8ADQAGAP3/9f/w/+//9P/8/wYADQAQAA4ACAD///f/8f/w//P/+v8CAAkADgAOAAsABQD9//X/8P/w//T//P8FAA0AEAAPAAkAAAD3//D/7//z//r/AgAKAA4ADgAKAAMA/P/2//L/8//3//3/BAAKAA0ADAAHAAEA+v/0//L/9P/6/wEABwALAAwACAACAPz/9//1//b/+v///wQACAAJAAcAAwD///r/+P/4//r//f8BAAUABwAGAAQAAAD8//n/+P/6//3/AQAFAAYABgADAP///P/5//n/+//+/wIABAAFAAUAAgD///z/+v/6//v//v8BAAQABgAGAAQAAAD8//n/+P/5//z/AQAEAAcABwAFAAEA/f/6//j/+f/7////AwAGAAcABgADAP//+//4//j/+f/9/wEABQAHAAcABQABAP3/+v/4//j/+////wMABgAHAAYAAwAAAPz/+f/5//r//f8AAAMABQAGAAQAAgD+//z/+v/6//z//v8BAAMABAAEAAIAAAD+//z//P/8//7/AAABAAIAAgACAAEAAAD///7//f/+////AAABAAEAAQAAAP/////+//////8AAAEAAAD//////v/+////AAABAAIAAgABAAAA/v/+//3//f/+////AAABAAIAAgACAAAA///9//z//P/9////AQADAAQABAACAP///P/7//v//P/+/wEAAwAEAAQAAgAAAP7//P/7//z//f///wEAAwAEAAMAAgAAAP7//P/7//v//f8AAAIABAAEAAMAAAD+//z//P/8//7/AAABAAIAAgABAAAA///+//7//v/+////AAABAAEAAQABAP///v/9//3//v8AAAEAAgACAAEA///9//z//P/+/wAAAgADAAMAAgAAAP7//P/8//z//f///wEAAwAEAAMAAgD///3/+//6//v//f8AAAMABgAGAAUAAQD9//r/+P/5//v///8DAAYABwAGAAMA///7//n/+P/6//3/AQAEAAcABwAGAAIA/v/6//f/9//6//7/AwAHAAkACAAEAAAA+//4//f/+P/8/wEABQAHAAgABQACAP3/+v/4//j/+v/+/wIABgAHAAcABAAAAPz/+f/4//n//f8BAAUABwAHAAQAAAD8//n/+P/6//z/AAAEAAYABgAEAAEA/v/7//n/+v/8////AwAFAAYABQACAP7/+//5//n/+////wMABgAHAAUAAgD+//r/+P/4//v///8DAAYACAAHAAMA///7//j/9//5//3/AgAGAAkACAAGAAEA/P/3//X/9//6/wAABQAJAAoACAADAP7/+P/1//X/+P/9/wMACAALAAoABgABAPr/9v/0//X/+v8AAAYACgALAAkABAD9//f/9P/0//f//f8DAAkACwAKAAYAAQD6//b/9P/1//r/AAAGAAoACwAJAAMA/f/3//T/9f/4//7/BAAJAAoACQAFAP//+v/2//X/+P/8/wEABgAJAAkABgABAPz/+P/2//f/+v8AAAUACQAJAAcAAgD9//j/9v/3//r///8EAAgACQAHAAMA/v/5//b/9v/5//7/AwAHAAkACAAFAP//+v/2//X/9//8/wIABwAKAAoABwABAPv/9v/0//b/+v8BAAcACgALAAgAAwD9//f/9P/0//j//v8EAAkADAALAAYAAAD5//T/8v/1//r/AQAIAAwADQAJAAMA+//1//L/8//4//7/BQALAA0ACwAGAP//+P/0//P/9f/7/wIACAAMAAwACQADAPz/9v/z//P/+P/+/wUACwAMAAoABQD+//j/9P/0//f//P8DAAgACwAKAAYAAQD7//b/9P/2//r/AAAGAAoACgAIAAMA/f/3//X/9f/5////BQAJAAoACAAEAP7/+f/2//b/+f/+/wMACAAKAAkABQD///r/9v/1//f//P8CAAcACgAKAAcAAQD7//b/9P/2//r/AAAGAAoACwAIAAMA/P/3//T/9P/4//7/BQAJAAsACgAFAP//+f/0//P/9v/7/wIACAAMAAwACAACAPv/9f/z//T/+P///wYACwANAAoABQD+//f/8//z//b//P8DAAkADAAMAAgAAQD7//X/8//0//n/AAAGAAsADAAKAAQA/v/3//T/9P/3//3/AwAJAAsACgAGAAAA+v/2//T/9v/6/wEABgAKAAoACAACAPz/9//1//b/+f///wQACAAKAAgABAD+//n/9v/2//j//f8DAAcACQAIAAUAAAA=" type="audio/x-wav">
+                    Your browser does not support the audio element.
+                </audio>
+              
+</div>
+</div>
+</section>
+</section>
+<section id="data-module" class="level2">
+<h2 class="anchored" data-anchor-id="data-module">Data module</h2>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/data.py#L271" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="multishapemultimaterialdatamodule" class="level3">
+<h3 class="anchored" data-anchor-id="multishapemultimaterialdatamodule">MultiShapeMultiMaterialDataModule</h3>
+<blockquote class="blockquote">
+<pre><code> MultiShapeMultiMaterialDataModule
+                                    (train_index_map_path:Union[pathlib.Pa
+                                    th,str], val_index_map_path:Union[path
+                                    lib.Path,str], test_index_map_path:Uni
+                                    on[pathlib.Path,str],
+                                    audio_length_in_seconds:float=0.3,
+                                    sample_rate:int=16000, material_ranges
+                                    :neuralresonator.modal.MaterialRanges=
+                                    MaterialRanges(rho=(500.0, 10000.0),
+                                    E=(1000000000.0, 1000000000000.0),
+                                    nu=(0.0, 0.5), alpha=(1.0, 30.0),
+                                    beta=(1e-08, 2e-06)),
+                                    batch_size:int=1, num_workers:int=0,
+                                    pin_memory:bool=False)</code></pre>
+</blockquote>
+<p>A data module for the MultiShapeMultiMaterialDataset</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>train_index_map_path</td>
+<td>typing.Union[pathlib.Path, str]</td>
+<td></td>
+<td>Directory containing training data</td>
+</tr>
+<tr class="even">
+<td>val_index_map_path</td>
+<td>typing.Union[pathlib.Path, str]</td>
+<td></td>
+<td>Directory containing validation data</td>
+</tr>
+<tr class="odd">
+<td>test_index_map_path</td>
+<td>typing.Union[pathlib.Path, str]</td>
+<td></td>
+<td>Directory containing test data</td>
+</tr>
+<tr class="even">
+<td>audio_length_in_seconds</td>
+<td>float</td>
+<td>0.3</td>
+<td>Length of audio to render</td>
+</tr>
+<tr class="odd">
+<td>sample_rate</td>
+<td>int</td>
+<td>16000</td>
+<td>Sample rate of audio to render</td>
+</tr>
+<tr class="even">
+<td>material_ranges</td>
+<td>MaterialRanges</td>
+<td>MaterialRanges(rho=(500.0, 10000.0), E=(1000000000.0, 1000000000000.0), nu=(0.0, 0.5), alpha=(1.0, 30.0), beta=(1e-08, 2e-06))</td>
+<td>Ranges of material parameters</td>
+</tr>
+<tr class="odd">
+<td>batch_size</td>
+<td>int</td>
+<td>1</td>
+<td>Batch size</td>
+</tr>
+<tr class="even">
+<td>num_workers</td>
+<td>int</td>
+<td>0</td>
+<td>Number of workers for data loading</td>
+</tr>
+<tr class="odd">
+<td>pin_memory</td>
+<td>bool</td>
+<td>False</td>
+<td>Whether to pin memory for data loading</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>None</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Create a data module</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dataset_args <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    audio_length_in_seconds<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    sample_rate<span class="op">=</span><span class="dv">16000</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>datamodule <span class="op">=</span> MultiShapeMultiMaterialDataModule(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    train_index_map_path<span class="op">=</span><span class="st">"data/index_map.csv"</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    val_index_map_path<span class="op">=</span><span class="st">"data/index_map.csv"</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    test_index_map_path<span class="op">=</span><span class="st">"data/index_map.csv"</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

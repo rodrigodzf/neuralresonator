@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="implements necessary DSP functionality using torch">
+
+<title>neuralresonator - DSP</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="neuralresonator - DSP">
+<meta property="og:description" content="implements necessary DSP functionality using torch">
+<meta property="og:image" content="https://rodrigodzf.github.io/neuralresonator/00_dsp_files/figure-html/cell-6-output-3.png">
+<meta property="og:site-name" content="neuralresonator">
+<meta property="og:image:height" content="413">
+<meta property="og:image:width" content="547">
+<meta name="twitter:title" content="neuralresonator - DSP">
+<meta name="twitter:description" content="implements necessary DSP functionality using torch">
+<meta name="twitter:image" content="https://rodrigodzf.github.io/neuralresonator/00_dsp_files/figure-html/cell-6-output-3.png">
+<meta name="twitter:image-height" content="413">
+<meta name="twitter:image-width" content="547">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">neuralresonator</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./dsp.html">DSP</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">About</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dsp.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">DSP</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./modal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modal synthesis</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Shape</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Models</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Training</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./utilities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Utilities</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./scripts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Scripts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./results.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Results</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#iir-filters" id="toc-iir-filters" class="nav-link active" data-scroll-target="#iir-filters">IIR filters</a>
+  <ul class="collapse">
+  <li><a href="#utility-functions" id="toc-utility-functions" class="nav-link" data-scroll-target="#utility-functions">Utility Functions</a>
+  <ul class="collapse">
+  <li><a href="#pole_or_zero_to_iir_coeff" id="toc-pole_or_zero_to_iir_coeff" class="nav-link" data-scroll-target="#pole_or_zero_to_iir_coeff">pole_or_zero_to_iir_coeff</a></li>
+  <li><a href="#constrain_complex_pole_or_zero" id="toc-constrain_complex_pole_or_zero" class="nav-link" data-scroll-target="#constrain_complex_pole_or_zero">constrain_complex_pole_or_zero</a></li>
+  <li><a href="#mtanh" id="toc-mtanh" class="nav-link" data-scroll-target="#mtanh">mtanh</a></li>
+  <li><a href="#biquad_freqz" id="toc-biquad_freqz" class="nav-link" data-scroll-target="#biquad_freqz">biquad_freqz</a></li>
+  </ul></li>
+  <li><a href="#main-interface" id="toc-main-interface" class="nav-link" data-scroll-target="#main-interface">Main Interface</a>
+  <ul class="collapse">
+  <li><a href="#iirmethod" id="toc-iirmethod" class="nav-link" data-scroll-target="#iirmethod">IIRMethod</a></li>
+  <li><a href="#iirparameters" id="toc-iirparameters" class="nav-link" data-scroll-target="#iirparameters">IIRParameters</a></li>
+  <li><a href="#apply_iir" id="toc-apply_iir" class="nav-link" data-scroll-target="#apply_iir">apply_iir</a></li>
+  <li><a href="#apply_filter" id="toc-apply_filter" class="nav-link" data-scroll-target="#apply_filter">apply_filter</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/rodrigodzf/neuralresonator/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">DSP</h1>
+</div>
+
+<div>
+  <div class="description">
+    implements necessary DSP functionality using <code>torch</code>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="iir-filters" class="level1">
+<h1>IIR filters</h1>
+<section id="utility-functions" class="level2">
+<h2 class="anchored" data-anchor-id="utility-functions">Utility Functions</h2>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L40" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="pole_or_zero_to_iir_coeff" class="level3">
+<h3 class="anchored" data-anchor-id="pole_or_zero_to_iir_coeff">pole_or_zero_to_iir_coeff</h3>
+<blockquote class="blockquote">
+<pre><code> pole_or_zero_to_iir_coeff (pole_or_zero:torch.Tensor)</code></pre>
+</blockquote>
+<p>Converts a complex pole or zero to IIR coefficients</p>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L26" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="constrain_complex_pole_or_zero" class="level3">
+<h3 class="anchored" data-anchor-id="constrain_complex_pole_or_zero">constrain_complex_pole_or_zero</h3>
+<blockquote class="blockquote">
+<pre><code> constrain_complex_pole_or_zero (pole_or_zero:torch.Tensor,
+                                 floor_eps:float=1e-10, ceil_eps:float=0,
+                                 c:float=1.0, d:float=1.0)</code></pre>
+</blockquote>
+<p>Saturates the absolute value of the complex pole or zero as it approaches the unit circle, preventing filter instability.</p>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L16" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="mtanh" class="level3">
+<h3 class="anchored" data-anchor-id="mtanh">mtanh</h3>
+<blockquote class="blockquote">
+<pre><code> mtanh (x:torch.Tensor, c:float=1.0, d:float=1.0)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L52" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="biquad_freqz" class="level3">
+<h3 class="anchored" data-anchor-id="biquad_freqz">biquad_freqz</h3>
+<blockquote class="blockquote">
+<pre><code> biquad_freqz (b:torch.Tensor, a:torch.Tensor,
+               n:Union[int,torch.Tensor]=512)</code></pre>
+</blockquote>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>b</td>
+<td>Tensor</td>
+<td></td>
+<td>Tensor of shape (…, 3)</td>
+</tr>
+<tr class="even">
+<td>a</td>
+<td>Tensor</td>
+<td></td>
+<td>Tensor of shape (…, 3)</td>
+</tr>
+<tr class="odd">
+<td>n</td>
+<td>typing.Union[int, torch.Tensor]</td>
+<td>512</td>
+<td>Number of points to evaluate the frequency response at</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>Tensor</strong></td>
+<td></td>
+<td><strong>Tensor of shape (…, n // 2 + 1)</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a pole zero pair</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pole <span class="op">=</span> torch.<span class="bu">complex</span>(real<span class="op">=</span>torch.tensor(<span class="fl">0.5</span>), imag<span class="op">=</span>torch.tensor(<span class="fl">0.3</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>zero <span class="op">=</span> torch.<span class="bu">complex</span>(real<span class="op">=</span>torch.tensor(<span class="fl">0.8</span>), imag<span class="op">=</span>torch.tensor(<span class="op">-</span><span class="fl">0.4</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># convert to IIR coefficients</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> pole_or_zero_to_iir_coeff(zero)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> pole_or_zero_to_iir_coeff(constrain_complex_pole_or_zero(pole))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># compute magnitude response</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> biquad_freqz(b, a, <span class="dv">129</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>H_mag <span class="op">=</span> H.<span class="bu">abs</span>()</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>plt.stem(H_mag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>H.shape: torch.Size([65])</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;StemContainer object of 3 artists&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="00_dsp_files/figure-html/cell-6-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="main-interface" class="level2">
+<h2 class="anchored" data-anchor-id="main-interface">Main Interface</h2>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L113" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="iirmethod" class="level3">
+<h3 class="anchored" data-anchor-id="iirmethod">IIRMethod</h3>
+<blockquote class="blockquote">
+<pre><code> IIRMethod (value, names=None, module=None, qualname=None, type=None,
+            start=1)</code></pre>
+</blockquote>
+<p>An enumeration over IIR computation backends. Available options:</p>
+<ul>
+<li><code>IIRMethod.FFT</code>: Uses the FFT frequency sampling method.</li>
+<li><code>IIRMethod.TDFII</code>: Uses the TDF-II algorithm.</li>
+</ul>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L126" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="iirparameters" class="level3">
+<h3 class="anchored" data-anchor-id="iirparameters">IIRParameters</h3>
+<blockquote class="blockquote">
+<pre><code> IIRParameters (b:Optional[torch.Tensor]=None,
+                a:Optional[torch.Tensor]=None,
+                poles:Optional[torch.Tensor]=None,
+                zeros:Optional[torch.Tensor]=None,
+                gains:Optional[torch.Tensor]=None,
+                constrain_poles:bool=True, constrain_zeros:bool=True,
+                constraint_eps:float=0.0)</code></pre>
+</blockquote>
+<p>A class for storing IIR filter parameters.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>b</td>
+<td>typing.Optional[torch.Tensor]</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>a</td>
+<td>typing.Optional[torch.Tensor]</td>
+<td>None</td>
+<td>The numerator coefficients (…, n_parallel, n_biquad, 3)</td>
+</tr>
+<tr class="odd">
+<td>poles</td>
+<td>typing.Optional[torch.Tensor]</td>
+<td>None</td>
+<td>The denominator coefficients (…, n_parallel, n_biquad, 3)</td>
+</tr>
+<tr class="even">
+<td>zeros</td>
+<td>typing.Optional[torch.Tensor]</td>
+<td>None</td>
+<td>The complex poles (…, n_parallel, n_biquad)</td>
+</tr>
+<tr class="odd">
+<td>gains</td>
+<td>typing.Optional[torch.Tensor]</td>
+<td>None</td>
+<td>The complex zeros (…, n_parallel, n_biquad)</td>
+</tr>
+<tr class="even">
+<td>constrain_poles</td>
+<td>bool</td>
+<td>True</td>
+<td>Whether to constrain the poles to the unit circle</td>
+</tr>
+<tr class="odd">
+<td>constrain_zeros</td>
+<td>bool</td>
+<td>True</td>
+<td>Whether to constrain the zeros to the unit circle</td>
+</tr>
+<tr class="even">
+<td>constraint_eps</td>
+<td>float</td>
+<td>0.0</td>
+<td>The epsilon value to use for pole/zero constraint</td>
+</tr>
+</tbody>
+</table>
+<p>We can demonstrate hybrid <code>freqz</code> computation by creating a network of passthrough filters:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>n_biquads <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>n_parallel <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> torch.zeros(n_parallel, n_biquads, <span class="dv">3</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>b[:, :, <span class="dv">0</span>] <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> torch.zeros(n_parallel, n_biquads, <span class="dv">3</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>a[:, :, <span class="dv">0</span>] <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>gains <span class="op">=</span> torch.ones(n_parallel, n_biquads) <span class="op">/</span> (n_parallel <span class="op">**</span> (<span class="dv">1</span> <span class="op">/</span> n_biquads))</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> IIRParameters(b<span class="op">=</span>b, a<span class="op">=</span>a, gains<span class="op">=</span>gains)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>plt.stem(params.freqz(<span class="dv">128</span>).<span class="bu">abs</span>())</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_dsp_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L297" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="apply_iir" class="level3">
+<h3 class="anchored" data-anchor-id="apply_iir">apply_iir</h3>
+<blockquote class="blockquote">
+<pre><code> apply_iir (x:torch.Tensor, parameters:__main__.IIRParameters,
+            method:__main__.IIRMethod=&lt;function _apply_biquad_fft&gt;,
+            expand_x:bool=True, reduce_x:bool=True)</code></pre>
+</blockquote>
+<p>Applies a biquad filter to a signal. The filter can be specified in two ways:</p>
+<ol type="1">
+<li>Directly as the biquad coefficients (b, a)</li>
+<li>As the complex poles and zeros (poles, zeros)</li>
+</ol>
+<p>In both cases, the filter can be specified as a parallel (<code>n_biquad = 1</code>), cascade (<code>n_parallel = 1</code>), or hybrid (<code>(n_biquad &gt; 1) and (n_parallel &gt; 1)</code>).</p>
+<p>The <code>method</code> parameter specifies the method to use for filtering. The FFT method is computed without recursion by frequency sampling, while the TDFII method is computed recursively using the transposed direct form II structure.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>x</td>
+<td>Tensor</td>
+<td></td>
+<td>The input signal (…, time)</td>
+</tr>
+<tr class="even">
+<td>parameters</td>
+<td>IIRParameters</td>
+<td></td>
+<td>The IIR filter parameters</td>
+</tr>
+<tr class="odd">
+<td>method</td>
+<td>IIRMethod</td>
+<td>_apply_biquad_fft</td>
+<td>The method to use for filtering</td>
+</tr>
+<tr class="even">
+<td>expand_x</td>
+<td>bool</td>
+<td>True</td>
+<td>Whether to expand the input signal to match the number of parallel filters</td>
+</tr>
+<tr class="odd">
+<td>reduce_x</td>
+<td>bool</td>
+<td>True</td>
+<td>Whether to sum the output signal along the parallel filter dimension</td>
+</tr>
+</tbody>
+</table>
+<p>Test that expected shape is returned:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>n_biquads <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n_parallel <span class="op">=</span> <span class="dv">9</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>poles <span class="op">=</span> torch.exp(<span class="op">-</span><span class="ot">1j</span> <span class="op">*</span> torch.rand(batch_size, n_parallel, n_biquads) <span class="op">*</span> np.pi)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>zeros <span class="op">=</span> torch.exp(<span class="op">-</span><span class="ot">1j</span> <span class="op">*</span> torch.rand(batch_size, n_parallel, n_biquads) <span class="op">*</span> np.pi)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>gains <span class="op">=</span> torch.rand(batch_size, n_parallel, n_biquads)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> IIRParameters(poles<span class="op">=</span>poles, zeros<span class="op">=</span>zeros, gains<span class="op">=</span>gains)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.rand(batch_size, n_samples)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> apply_iir(x, params, IIRMethod.FFT).shape <span class="op">==</span> x.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>n_biquads <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>n_parallel <span class="op">=</span> <span class="dv">9</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> torch.rand(batch_size, n_parallel, n_biquads, <span class="dv">3</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> torch.rand(batch_size, n_parallel, n_biquads, <span class="dv">3</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>gains <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> IIRParameters(b<span class="op">=</span>b, a<span class="op">=</span>a, gains<span class="op">=</span>gains)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.rand(batch_size, n_samples)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> apply_iir(x, params, IIRMethod.TDFII).shape <span class="op">==</span> x.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can also have an optimized version of the above</p>
+<hr>
+<p><a href="https://github.com/rodrigodzf/neuralresonator/blob/main/neuralresonator/dsp.py#L344" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="apply_filter" class="level3">
+<h3 class="anchored" data-anchor-id="apply_filter">apply_filter</h3>
+<blockquote class="blockquote">
+<pre><code> apply_filter (x_arr:numpy.ndarray, a:numpy.ndarray, b:numpy.ndarray,
+               state:Optional[numpy.ndarray]=None)</code></pre>
+</blockquote>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>x_arr</td>
+<td>ndarray</td>
+<td></td>
+<td>[n_samples]</td>
+</tr>
+<tr class="even">
+<td>a</td>
+<td>ndarray</td>
+<td></td>
+<td>[n_parallel, n_biquads, 3]</td>
+</tr>
+<tr class="odd">
+<td>b</td>
+<td>ndarray</td>
+<td></td>
+<td>[n_parallel, n_biquads, 3]</td>
+</tr>
+<tr class="even">
+<td>state</td>
+<td>typing.Optional[numpy.ndarray]</td>
+<td>None</td>
+<td>[n_parallel, n_biquads, 2]</td>
+</tr>
+</tbody>
+</table>
+<p>Test fast filter</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a pole zero pair</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>pole <span class="op">=</span> torch.<span class="bu">complex</span>(real<span class="op">=</span>torch.tensor(<span class="fl">0.5</span>), imag<span class="op">=</span>torch.tensor(<span class="fl">0.3</span>))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>zero <span class="op">=</span> torch.<span class="bu">complex</span>(real<span class="op">=</span>torch.tensor(<span class="fl">0.8</span>), imag<span class="op">=</span>torch.tensor(<span class="op">-</span><span class="fl">0.4</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># convert to IIR coefficients</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> pole_or_zero_to_iir_coeff(zero)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> pole_or_zero_to_iir_coeff(constrain_complex_pole_or_zero(pole))</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> b.view(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> a.view(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>impulse <span class="op">=</span> torch.zeros(<span class="dv">256</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>impulse[<span class="dv">0</span>] <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>gains <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> IIRParameters(b<span class="op">=</span>b, a<span class="op">=</span>a)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>filtered_torch <span class="op">=</span> apply_iir(impulse.unsqueeze(<span class="dv">0</span>), params, IIRMethod.TDFII)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>filtered <span class="op">=</span> apply_filter(</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    x_arr<span class="op">=</span>impulse.cpu().numpy(),</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> a.cpu().numpy(),</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> b.cpu().numpy(),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="co"># check that the output is the same</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(filtered, filtered_torch[<span class="dv">0</span>].detach().cpu().numpy())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
